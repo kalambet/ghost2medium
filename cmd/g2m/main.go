@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	medium "github.com/kalambet/medium-sdk-go"
 )
@@ -30,7 +31,7 @@ func main() {
 		exitWithError("There are no publications where you can import your archive.")
 	}
 
-	printInColor("Please select Publication you want import your archive to:", Green)
+	printInColor("List of all Publications you can contribute to:\n", Green)
 	for idx, pub := range *publications {
 		contributors, err := m.GetContributors(pub.ID)
 		if err != nil {
@@ -39,20 +40,21 @@ func main() {
 
 		for _, c := range *contributors {
 			if c.UserID == u.ID {
-				fmt.Printf("%d: %s (URL: %s)\n", idx, pub.Name, pub.URL)
+				fmt.Printf("\t%d: %s (URL: %s)\n", idx, pub.Name, pub.URL)
 			}
 		}
 	}
 
+	fmt.Print("\nPlease select Publication you want import your archive to: ")
 	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
+	userInput, _ := reader.ReadString('\n')
 
-	pubIdx, err := strconv.Atoi(text)
-	if err != nil || pubIdx-1 > len(*publications) {
-		exitWithError("Please make a correct publication choice")
+	pubIdx, err := strconv.Atoi(strings.Trim(userInput, "\n"))
+	if err != nil || pubIdx > len(*publications) {
+		exitWithError(err.Error())
 	}
 
-	fmt.Printf("Tags: %#v\n", (*publications)[pubIdx-1])
+	fmt.Printf("Tags: %#v\n", (*publications)[pubIdx])
 
 	//_, err = g2m.DecodeJSONArchive(*path)
 
@@ -96,7 +98,7 @@ func logInColor(message string, color int) {
 }
 
 func printInColor(message string, color int) {
-	fmt.Printf("\033[%dm%s\033[0m\n\n", color, message)
+	fmt.Printf("\033[%dm%s\033[0m\n", color, message)
 }
 
 func exitWithError(message string) {
