@@ -2,7 +2,7 @@ package ghost2medium
 
 import (
 	"encoding/json"
-	"os"
+	"time"
 )
 
 type Archive struct {
@@ -64,6 +64,7 @@ type Post struct {
 	Amp             json.RawMessage `json:"amp"`
 
 	Tags []string
+	Date time.Time
 }
 
 type Tag struct {
@@ -93,35 +94,8 @@ type PostTags struct {
 type TagsPostMap map[int][]int
 type Tags map[int]Tag
 
-// DecodeJSONArchive decode provided JSON to array of Post
-func DecodeJSONArchive(path string) (posts []*Post, err error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
+type ByDate []*Post
 
-	decoder := json.NewDecoder(file)
-
-	archive := new(Archive)
-	if err = decoder.Decode(archive); err != nil {
-		return nil, err
-	}
-
-	tagsPostsMap := make(TagsPostMap)
-	for _, pt := range archive.DB[0].Data.PostTags {
-		tagsPostsMap[pt.PostID] = append(tagsPostsMap[pt.PostID], pt.TagID)
-	}
-
-	tags := make(Tags)
-	for _, t := range archive.DB[0].Data.Tags {
-		tags[t.ID] = *t
-	}
-
-	for idx := range archive.DB[0].Data.Posts {
-		for _, tagID := range tagsPostsMap[archive.DB[0].Data.Posts[idx].ID] {
-			archive.DB[0].Data.Posts[idx].Tags = append(archive.DB[0].Data.Posts[idx].Tags, tags[tagID].Name)
-		}
-	}
-
-	return archive.DB[0].Data.Posts, nil
-}
+func (a ByDate) Len() int           { return len(a) }
+func (a ByDate) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByDate) Less(i, j int) bool { return a[i].Date.Before(a[j].Date) }
