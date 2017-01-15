@@ -29,6 +29,10 @@ func Import(token string, test bool, posts []*Post) (err error) {
 		return errors.New("there are no posts to import")
 	}
 
+	utils.PrintInColorln(fmt.Sprintf("\n\tNumber of posts in your archive is %d", len(posts)), utils.Green)
+	utils.PrintInColorln("\nYou'll need it later for letter 📬  to Medium mailto:yourfriends@medium.com", utils.Yellow)
+	utils.PrintInColorln("Please read: https://github.com/Medium/medium-api-docs/issues/28 \n", utils.Magenta)
+
 	d := &destination{}
 	err = d.selectPublication(token)
 
@@ -83,7 +87,7 @@ func (d *destination) selectPublication(token string) (err error) {
 	utils.PrintInColorln("100%", utils.Yellow)
 
 	uiIndex := 1 // Start from 1 for user conveniens
-	utils.PrintInColorln("\n\nPlease select Publication you want import your archive to: ", utils.Magenta)
+	utils.PrintInColorln("\nPlease select Publication you want import your archive to: ", utils.Magenta)
 	for _, pub := range publicationsSelector {
 		msg := fmt.Sprintf("\t%d: As %s to the %s (URL: %s, ID: %s)",
 			uiIndex,
@@ -111,20 +115,20 @@ func (d *destination) selectPublication(token string) (err error) {
 }
 
 func (d *destination) importArchive(posts []*Post, test bool) (err error) {
-
 	for _, post := range posts {
 		utils.PrintInColorln(fmt.Sprintf("\tImporting post '%s' (UUID: %s) ...", post.Title, post.UUID), utils.Yellow)
 		utils.PrintInColorln(fmt.Sprintf("\tPublish Date: %s", post.Date.String()), utils.Cyan)
 		if !test {
 			_, err := d.Medium.CreatePost(medium.CreatePostOptions{
-				UserID:        d.User.ID,
-				Title:         post.Title,
-				Content:       post.Markdown,
-				ContentFormat: medium.ContentFormatMarkdown,
-				PublishStatus: medium.PublishStatusDraft,
-				PublishedAt:   post.CreatedAt,
-				Tags:          post.Tags,
-				PublicationID: d.Publication.Publication.ID,
+				UserID:          d.User.ID,
+				Title:           post.Title,
+				Content:         post.Markdown,
+				ContentFormat:   medium.ContentFormatMarkdown,
+				PublishStatus:   medium.PublishStatusDraft,
+				PublishedAt:     post.CreatedAt,
+				Tags:            post.Tags,
+				PublicationID:   d.Publication.Publication.ID,
+				NotifyFollowers: false,
 			})
 			if err != nil {
 				utils.PrintInColorln(fmt.Sprintf("\tPost with id %s was not imported", post.UUID), utils.Red)
