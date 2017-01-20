@@ -25,7 +25,7 @@ func main() {
 		utils.ExitWithError(err.Error())
 	}
 
-	utils.PrintInColorln("Finished ✅ ", utils.Green)
+	utils.PrintInColorln("Finished ✅ \n", utils.Green)
 }
 
 func parseArgs() (archive *string, token *string, test *bool, err error) {

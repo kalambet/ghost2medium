@@ -115,8 +115,8 @@ func (d *destination) selectPublication(token string) (err error) {
 }
 
 func (d *destination) importArchive(posts []*Post, test bool) (err error) {
-	for _, post := range posts {
-		utils.PrintInColorln(fmt.Sprintf("\tImporting post '%s' (UUID: %s) ...", post.Title, post.UUID), utils.Yellow)
+	for idx, post := range posts {
+		utils.PrintInColorln(fmt.Sprintf("\tImporting post %d '%s' (UUID: %s) ...", idx, post.Title, post.UUID), utils.Yellow)
 		utils.PrintInColorln(fmt.Sprintf("\tPublish Date: %s", post.Date.String()), utils.Cyan)
 		if !test {
 			_, err := d.Medium.CreatePost(medium.CreatePostOptions{
