@@ -24,23 +24,19 @@ type destination struct {
 }
 
 // Import intercative CLI Publicaiton slector
-func Import(token string, test bool, posts []*Post) (err error) {
-	if len(posts) == 0 {
-		return errors.New("there are no posts to import")
-	}
-
+func Import(token string, migrate bool, posts []*Post) error {
 	utils.PrintInColorln(fmt.Sprintf("\n\tNumber of posts in your archive is %d", len(posts)), utils.Green)
 	utils.PrintInColorln("\nYou'll need it later for letter 📬  to Medium mailto:yourfriends@medium.com", utils.Yellow)
 	utils.PrintInColorln("Please read: https://github.com/Medium/medium-api-docs/issues/28 \n", utils.Magenta)
 
 	d := &destination{}
-	err = d.selectPublication(token)
+	err := d.selectPublication(token)
 
 	if err != nil {
 		return err
 	}
 
-	err = d.importArchive(posts, test)
+	err = d.importArchive(posts, migrate)
 	if err != nil {
 		return err
 	}
@@ -48,9 +44,14 @@ func Import(token string, test bool, posts []*Post) (err error) {
 	return nil
 }
 
-func (d *destination) selectPublication(token string) (err error) {
+func (d *destination) selectPublication(token string) error {
+	if token == "" {
+		return errors.New("token can't be epmty")
+	}
+
 	d.Medium = medium.NewClientWithAccessToken(token)
 
+	var err error
 	d.User, err = d.Medium.GetUser()
 	if err != nil {
 		return err
@@ -114,17 +115,21 @@ func (d *destination) selectPublication(token string) (err error) {
 	return nil
 }
 
-func (d *destination) importArchive(posts []*Post, test bool) (err error) {
+func (d *destination) importArchive(posts []*Post, migrate bool) (err error) {
+	if len(posts) == 0 {
+		return errors.New("there are no posts to import")
+	}
+
 	for idx, post := range posts {
 		utils.PrintInColorln(fmt.Sprintf("\tImporting post %d '%s' (UUID: %s) ...", idx, post.Title, post.UUID), utils.Yellow)
 		utils.PrintInColorln(fmt.Sprintf("\tPublish Date: %s", post.Date.String()), utils.Cyan)
-		if !test {
+		if migrate {
 			_, err := d.Medium.CreatePost(medium.CreatePostOptions{
 				UserID:          d.User.ID,
 				Title:           post.Title,
 				Content:         post.Markdown,
 				ContentFormat:   medium.ContentFormatMarkdown,
-				PublishStatus:   medium.PublishStatusDraft,
+				PublishStatus:   medium.PublishStatusPublic,
 				PublishedAt:     post.CreatedAt,
 				Tags:            post.Tags,
 				PublicationID:   d.Publication.Publication.ID,

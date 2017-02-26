@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	archive, token, test, err := parseArgs()
+	archive, token, migarte, err := parseArgs()
 	if err != nil {
 		utils.ExitWithError(err.Error())
 	}
@@ -20,7 +20,7 @@ func main() {
 		utils.ExitWithError(err.Error())
 	}
 
-	err = g2m.Import(*token, *test, posts)
+	err = g2m.Import(*token, *migarte, posts)
 	if err != nil {
 		utils.ExitWithError(err.Error())
 	}
@@ -28,12 +28,18 @@ func main() {
 	utils.PrintInColorln("Finished ✅ \n", utils.Green)
 }
 
-func parseArgs() (archive *string, token *string, test *bool, err error) {
+func parseArgs() (archive *string, token *string, migrate *bool, err error) {
 	archive = flag.String("archive", "", "Path to ghost archive JSON")
 	token = flag.String("token", "", "Self issues Medium access token")
-	test = flag.Bool("test", true, "Do all steps except actual posting")
+	migrate = flag.Bool("migrate", false, "Without this options we'll Do all steps except actual posting")
 
 	flag.Parse()
+
+	if *migrate {
+		utils.PrintInColorln("\n\tThis run will import all the entries", utils.Yellow)
+	} else {
+		utils.PrintInColorln("\n\tThis is a test run", utils.Yellow)
+	}
 
 	if archive == nil || *archive == "" {
 		return nil, nil, nil, errors.New("In order to migrate yor blog 📑  to Medium you must provide path to JSON file with archive 🗄")
