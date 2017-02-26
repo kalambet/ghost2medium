@@ -5,15 +5,19 @@ import (
 	"time"
 )
 
+// Archive represents parnet obejct for Ghost archive
+// it usually continas one or more Blogs
 type Archive struct {
 	DB []*Blog `json:"db"`
 }
 
+// Blog is a high level entity describing Blog metadata
 type Blog struct {
 	MetaRaw json.RawMessage `json:"meta"`
 	Data    *BlogData       `json:"data"`
 }
 
+// BlogData actual blog data  Here we interested only in posts and its tags
 type BlogData struct {
 	StatementsRaw       json.RawMessage `json:"pg_stat_statements"`
 	GeographyClmnsRaw   json.RawMessage `json:"geography_columns"`
@@ -38,6 +42,8 @@ type BlogData struct {
 	Subscribers         json.RawMessage `json:"subscribers"`
 }
 
+// Post cotain all useful info about post itself
+// Most of Post content will be imported into Medium
 type Post struct {
 	ID              int             `json:"id"`
 	UUID            string          `json:"uuid"`
@@ -67,6 +73,7 @@ type Post struct {
 	Date time.Time
 }
 
+// Tag contain information about Ghost post tag
 type Tag struct {
 	ID              int             `json:"id"`
 	UUID            string          `json:"uuid"`
@@ -84,6 +91,7 @@ type Tag struct {
 	Visibility      string          `json:"visibility"`
 }
 
+// PostTags is a structure to tie Post and Tag together
 type PostTags struct {
 	ID        int `json:"id"`
 	PostID    int `json:"post_id"`
@@ -91,9 +99,13 @@ type PostTags struct {
 	SortOrder int `json:"sort_order"`
 }
 
+// TagsPostMap helper map that store PostTags array content
 type TagsPostMap map[int][]int
+
+// Tags maps tag identifier with Tag object
 type Tags map[int]Tag
 
+// ByDate helper type that implements sorting interface
 type ByDate []*Post
 
 func (a ByDate) Len() int           { return len(a) }
