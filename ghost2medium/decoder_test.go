@@ -16,7 +16,7 @@ func TestDecodeJSONArchive(t *testing.T) {
 		t.Error("Empty Decoder call should return empty array!")
 	}
 
-	posts, err = DecodeJSONArchive("./blog_test.json")
+	posts, err = DecodeJSONArchive("./testdata/blog_test.json")
 
 	if err != nil {
 		t.Error(err.Error())
